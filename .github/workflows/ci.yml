@@ -1,0 +1,54 @@
+# Experiment 3 - full CI: lint + tests on 2 Python versions + Docker build
+name: ML App CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Lint with flake8
+        run: flake8 .
+
+      - name: Train model
+        run: python -m src.train
+
+      - name: Run Tests
+        run: pytest -v
+
+  docker-build:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t student-pass-app:ci .
+
+      - name: Smoke test the container
+        run: |
+          docker run -d --name app -p 8501:8501 student-pass-app:ci
+          sleep 15
+          curl --fail http://localhost:8501/_stcore/health
