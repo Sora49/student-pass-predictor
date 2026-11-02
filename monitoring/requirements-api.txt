@@ -1,0 +1,5 @@
+flask>=3.0
+prometheus-client>=0.20
+scikit-learn>=1.5
+pandas>=2.2
+joblib>=1.4
