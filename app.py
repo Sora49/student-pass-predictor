@@ -34,4 +34,4 @@ if st.button("Predict", type="primary"):
         st.error(f"Prediction: **{label}**  (probability of passing: {prob:.0%})")
     st.progress(prob)
 
-st.caption("Model version 1.0")
+st.caption("Model version 1.1 – added by feature branch")
